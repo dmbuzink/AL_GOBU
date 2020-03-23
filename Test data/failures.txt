@@ -1,0 +1,2 @@
+File: F:\DevFile\AL_GOBU\Test data/With People\AD.jpg. Should have been: With People. Certainty was  0,6091 and doubt was  0,3909
+File: F:\DevFile\AL_GOBU\Test data/With People\AG.jpg. Should have been: With People. Certainty was  0,5749 and doubt was  0,4251

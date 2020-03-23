@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using PeopleRegocML.Model;
 
 namespace PeopleRegoc
@@ -11,24 +12,35 @@ namespace PeopleRegoc
 
         public static TestResults Test(string datasetLocation)
         {
-            var imagesWithPeople = SetupTestInput(datasetLocation, "With people");
-            var imagesWithoutPeople = SetupTestInput(datasetLocation, "Without people");
+            var imagesWithPeople = SetupTestInput(datasetLocation, "With People");
+            var imagesWithoutPeople = SetupTestInput(datasetLocation, "Without People");
             var dataset = imagesWithPeople.Union(imagesWithoutPeople)
                 .OrderBy(i => new Random().Next()); // random order
 
             var results = new TestResults();
             foreach (var input in dataset)
             {
+                Console.WriteLine($"Predicting: {input.ImageSource} ({input.Label})");
                 var result = ConsumeModel.Predict(input);
-
                 // result storage
-                if (result.Prediction.Equals(input.Label))
+                var correctPrediction = result.Prediction.Equals(input.Label);
+                Console.WriteLine($"Got it {(correctPrediction ? "Right" : "Wrong")}");
+                Console.WriteLine($"{result.Score.Print()}");
+                if (correctPrediction)
                 {
                     results.AmountSucceeded++;
                 }
                 else
                 {
-                    results.FailedImages = results.FailedImages.Append(input.ImageSource);
+                    var failedResult = new FailedResult()
+                    {
+                        FilePath = input.ImageSource,
+                        CorrectLabel = input.Label,
+                        Certainty = result.Score.Max(),
+                        Doubt = result.Score.Min()
+                    };
+                    results.FailedImages = results.FailedImages.Append(failedResult);
+                    failedResult.WriteToFile($"{datasetLocation}/failures.txt");
                 }
             }
 
@@ -49,17 +61,16 @@ namespace PeopleRegoc
 
             return inputs;
         }
-    }
 
-    public class TestInput
-    {
-        public string FilePath { get; set; }
-        public string Label { get; set; }
-
-        public TestInput(string filePath, string label)
+        public static string Print(this float[] array)
         {
-            this.FilePath = filePath;
-            this.Label = label;
+            var sb = new StringBuilder();
+            foreach (var element in array)
+            {
+                sb = sb.Append(element + ", ");
+            }
+
+            return sb.ToString();
         }
     }
 
@@ -67,7 +78,7 @@ namespace PeopleRegoc
     {
         public float Accuracy { get; set; }
         public int AmountSucceeded { get; set; } = 0;
-        public IEnumerable<string> FailedImages { get; set; } = new LinkedList<string>();
+        public IEnumerable<FailedResult> FailedImages { get; set; } = new LinkedList<FailedResult>();
         public int DatasetSize { get; set; }
     }
 }

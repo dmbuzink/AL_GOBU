@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using PeopleRegocML.Model;
 
 namespace PeopleRegoc
@@ -25,6 +26,8 @@ namespace PeopleRegoc
             {
                 Console.WriteLine($"Failed image: {failedImage}");
             }
+
+            Console.ReadLine();
         }
     }
 }
