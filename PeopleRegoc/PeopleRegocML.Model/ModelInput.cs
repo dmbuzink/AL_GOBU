@@ -13,6 +13,10 @@ namespace PeopleRegocML.Model
         [ColumnName("ImageSource"), LoadColumn(1)]
         public string ImageSource { get; set; }
 
-
+        public ModelInput(string imageSource, string label)
+        {
+            this.ImageSource = imageSource;
+            this.Label = label;
+        }
     }
 }
